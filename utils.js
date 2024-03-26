@@ -1,3 +1,5 @@
+//!1
+
 // import './bundle.js'
 
 // export const {DataEvents, getID, generateUID, throttle, debounce, getRandomRange, formatTime, formatDate, formatDateTime} = utils;
