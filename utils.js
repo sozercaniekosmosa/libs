@@ -346,3 +346,20 @@ export function utf8ToAscii(str) {
 
     return Array.from(u8s).map(v => String.fromCharCode(v)).join('');
 }
+
+export function saveUnitArrayAsFile(encoded) {
+    // var uriEncoded = encodeURIComponent(String.fromCharCode.apply(null, encoded));
+    var hexStr = "";
+    for (var i = 0; i < encoded.length; i++) {
+        var s = encoded[i].toString(16);
+        if (s.length == 1) s = '0' + s;
+        hexStr += '%' + s;
+    }
+    var uriContent = 'data:application/octet-stream,' + hexStr;
+    var pom = document.createElement('a');
+    pom.setAttribute('href', uriContent);
+    pom.setAttribute('download', 'output.mid');
+    document.body.appendChild(pom);
+    pom.click();
+    document.body.removeChild(pom);
+}
