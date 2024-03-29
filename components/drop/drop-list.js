@@ -25,10 +25,15 @@ element('drop-list', function () {
     });
 
     this.render = () => {
-        this.jsx = `<select class="drop-list" destination>
+        this.jsx = `<select class="drop-list" destination _sel>
             <option value="0" ${this.index === 0 ? 'selected' : ''}></option>
             ${this._data.length ? this._data.map((val, i) => `<option value="${i + 1}" ${this.index === i + 1 ? 'selected' : ''}>${val}</option>`).join('') : ''}
         </select>`;
+
+        if (this.index !== 0) {
+            this._sel.value = +this.index + 1
+            this.eventHandler.change({target: this._sel})
+        }
     };
 
     this.onConnected = () => {

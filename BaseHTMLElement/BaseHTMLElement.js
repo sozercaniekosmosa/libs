@@ -100,6 +100,8 @@ export default class BaseHTMLElement extends HTMLElement {
                     } else if (key.startsWith('on')) {
                         const eventName = key.toLocaleLowerCase().substring('on'.length);
                         el.addEventListener(eventName, val);
+                        el.eventHandler ??= {}
+                        el.eventHandler[eventName] = val;
                     } else if (key.startsWith('class')) {
                         el.className = val;
                     } else if (key === 'destination') {
