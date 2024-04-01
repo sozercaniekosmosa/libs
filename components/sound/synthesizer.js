@@ -133,7 +133,7 @@ export default class Synthesizer {
     getTotalTicks = async () => await this.synth && this.synth.retrievePlayerTotalTicks()
 
     /**
-     * Запустить воспроизведение
+     * Начать воспроизведение
      * @returns {Promise<void>}
      */
     play = async () => {
