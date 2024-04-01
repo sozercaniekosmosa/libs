@@ -1,12 +1,8 @@
 import {range} from "../../utils.js";
 import Synthesizer from "./synthesizer.js";
-
-
-
-let pathSF2 = './libs/components/sound/sf2/';
-let pathMidi = './libs/components/sound/mid/';
-let arrUrlSF2 = ['HedsoundGMTfix.sf2', 'Ephesus_GM_Version_1_00.sf2', 'FatBoy-v0.789.sf2', 'OPLLandOPLL2DrumFix2.sf2', 'GenieVoice_GM64Pro_2.0_-_All_Sets.sf2', 'eawpats.sf2', 'GeneralUser_GS_SoftSynth_v144.sf2', 'Growtopia.sf2', 'Boyband.sf2', 'Kiara_Klarinet.sf2', 'VintageDreamsWaves-v2.sf2', 'OnuteFont-Mini.sf2']
-let arrUrlMidi = ['Pirates of the Caribbean - He is a Pirate (1).mid', 'Star Wars - The Imperial March.mid', 'Under-The-Sea.mid', 'DuckTales MIDI Intro.mid', 'output.mid']
+import "../drop/drop-list.js";
+import "../button/button-control.js";
+import "../slider/slider-control.js";
 
 
 element('player-control', function () {
@@ -24,22 +20,26 @@ element('player-control', function () {
     Object.assign(this, new Synthesizer());
 
     this.range = range;
-    this.arrUrlSF2 = arrUrlSF2;
-    this.arrUrlMidi = arrUrlMidi;
-    this.pathSF2 = pathSF2;
-    this.pathMidi = pathMidi;
 
-    this.onConnected = async () => {
-        this.innerHTML = '<spinner-process/>'
 
+    this.setSources = ({arrUrlSF2, arrUrlMidi, pathSF2 = './libs/components/sound/sf2/', pathMidi = './libs/components/sound/mid/'}) => {
+        this.arrUrlSF2 = arrUrlSF2;
+        this.arrUrlMidi = arrUrlMidi;
+        this.pathSF2 = pathSF2;
+        this.pathMidi = pathMidi;
+
+        render();
+    }
+
+    const render = () => {
         this.innerHTML = ''
         // language=JSX
         this.jsx = `
-            <drop-list data={this.arrUrlSF2} index="3" onchange={async e => {
+            <drop-list data={this.arrUrlSF2 ?? []} index="0" onchange={async e => {
                 const index = e.target.selectedIndex - 1
                 if (~index) await this.loadResource({urlSF: this.pathSF2 + this.arrUrlSF2[index]});
             }}/>
-            <drop-list data={this.arrUrlMidi} index="3" onchange={async e => {
+            <drop-list data={this.arrUrlMidi ?? []} index="26" onchange={async e => {
                 const index = e.target.selectedIndex - 1
                 if (~index) await this.loadResource({urlMel: this.pathMidi + this.arrUrlMidi[index]});
             }}/>
@@ -57,6 +57,10 @@ element('player-control', function () {
                             label={(val, min, max) => (Math.trunc(this.range(min, max, -100, 100, val))) + '%'}
                             max="16384" min="0" value="8192"
                             step="1638.4" _pitch/>`;
+    };
+
+    this.onConnected = async () => {
+        this.innerHTML = '<spinner-process/>'
     };
 
     this.update = async () => {

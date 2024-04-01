@@ -253,7 +253,7 @@ export function protocolHandler(protocol = 'json', data) {
     }
 }
 
-export const rpc = ({host, port, protocol = 'json', method='method', data, clbMessage, taskID, clbError, clientData} = {}) => {
+export const rpc = ({host, port, protocol = 'json', method = 'method', data, clbMessage, taskID, clbError, clientData} = {}) => {
     const ccid = getCookie('CapsuleClientId')
     return sendData({
         host, port, protocol,
@@ -338,6 +338,11 @@ export async function loadBinary(url) {
 export async function loadText(url) {
     const resp = await fetch(url);
     return await resp.text();
+}
+
+export async function loadJSON(url) {
+    const resp = await fetch(url);
+    return await resp.json();
 }
 
 export function utf8ToAscii(str) {

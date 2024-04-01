@@ -1,3 +1,5 @@
+import '../../BaseHTMLElement/BaseHTMLElement.js'
+
 element('button-control', function () {
     // style
     // language=CSS

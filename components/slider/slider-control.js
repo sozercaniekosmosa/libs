@@ -1,3 +1,4 @@
+import '../../BaseHTMLElement/BaseHTMLElement.js'
 import {getDeltaMouseMove} from '../../utils.js'
 
 element('slider-control', function () {

@@ -1,3 +1,4 @@
+import '../../BaseHTMLElement/BaseHTMLElement.js'
 import {range} from "../../utils.js";
 
 element('drop-list', function () {
@@ -30,7 +31,7 @@ element('drop-list', function () {
             ${this._data.length ? this._data.map((val, i) => `<option value="${i + 1}" ${this.index === i + 1 ? 'selected' : ''}>${val}</option>`).join('') : ''}
         </select>`;
 
-        if (this.index !== 0) {
+        if (this._data.length && this.index !== 0) {
             this._sel.value = +this.index + 1
             this.eventHandler.change({target: this._sel})
         }
