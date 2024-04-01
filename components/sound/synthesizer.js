@@ -11,8 +11,8 @@ document.head.appendChild(script);
  *
  * Пример использования:
  *
- * let clickButton = async () => { // не просто так
- *     let s = new Synthesizer()   // создание аудио контекста обязательно должно быть встроено в обработчки кнопки
+ * let clickButton = async () => { // здесь clickButton не просто так
+ *     let s = new Synthesizer()   // создание аудио контекста обязательно должно быть встроено в обработчик кнопки
  *     await s.loadResource({urlSF: './sf2/sound-font.sf2', urlMel: './mid/melody.mid'})
  *     await s.play()
  * }
@@ -80,6 +80,13 @@ export default class Synthesizer {
     };
 
     /**
+     * Сейчас воспроизводится трек?
+     * @returns {boolean}
+     */
+    isPlaying = () => this.synth && this.synth.isPlaying()
+    getSynth = () => this.synth;
+
+    /**
      * Позиция воспроизведения трека
      * @param val
      * @returns {*}
@@ -143,6 +150,10 @@ export default class Synthesizer {
         await this.synth.waitForPlayerStopped();
         await this.synth.waitForVoicesStopped();
         await this.synth.resetPlayer();
+    }
+    play2 = async () => {
+        await this.initializeSynthesizer();
+        await this.synth.playPlayer()
     }
 
     /**
