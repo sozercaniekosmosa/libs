@@ -12,17 +12,20 @@ element('slider-control', function () {
             display: flex;
             align-items: center;
             gap: .5rem;
-            max-width: 500px;
+            width: inherit;
+            /*max-width: 500px;*/
             margin: 0 auto;
-            background: #fff;
+            /*background: #fff;*/
             padding: 0px 10px;
-            font-size: .8em;
+            /*font-size: .8em;*/
+            font-size: inherit;
+            color: inherit;
         }
 
         input[type="range"] {
             -webkit-appearance: none;
             appearance: none;
-            width: auto;
+            width: inherit;/*width: auto;*/
             cursor: pointer;
             outline: none;
             border-radius: 15px;

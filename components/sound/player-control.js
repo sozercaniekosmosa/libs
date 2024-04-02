@@ -11,16 +11,62 @@ element('player-control', function () {
     // language=CSS
     this.setStyle(`
         player-control {
+            font-size: 1em;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 500px;
+            height: 100px;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+            background-color: #dbdbdb;
+            padding: 0.5em;
+        }
+
+        .player-control-tempo {
+            font-size: inherit;
+            font-family: inherit;
+            color: inherit;
+            width: 5em;
+            border: none;
+            background-color: #efefef;
+            border-radius: 1em;
+            padding: 0 0.8em;
+            height: 2em;
+        }
+
+        .player-control-seeker {
+            height: 2em;
+            padding: 0 0.8em;
+            border: none;
+            background-color: #efefef;
+            border-radius: 1em;
+        }
+
+        .player-control-top {
+            width: ${'-webkit-fill-available'};
             display: flex;
             flex-direction: row;
+            justify-content: space-between;
             flex-wrap: nowrap;
+        }
+
+        .player-control-mid {
+            display: flex;
+            width: ${'-webkit-fill-available'};
+            /* flex: 1 1 auto; */
+            flex-direction: row;
+        }
+
+        .player-control-bottom {
+            display: flex;
+            flex-direction: row;
         }
     `);
 
     Object.assign(this, new Synthesizer());
 
-    this.currTick = 0;
-    this.isPlay = false;
+    this.lastIsPlaying = false;
     this.range = range;
     this.indexSF2 = 0;
     this.indexMidi = 0;
@@ -40,25 +86,18 @@ element('player-control', function () {
         // language=JSX
         this.jsx = `
             <div class="player-control-top">
-                <button-control onclick={async e => {
-                    this.play();
-                    this.isPlay = true;
-                }}>►
-                </button-control>
-                <button-control onclick={e => {
-                    this.stop()
-                    this.isPlay = false;
-                }}>Х
-                </button-control>
-                <slider-control change={val => this.seek(val)}
+                <button-control onclick={async e => this.play()}>►</button-control>
+                <button-control onclick={e => this.stop()}>Х</button-control>
+                <slider-control change={val => this.volume(val)} value="0" max="10" step=".1" _gain/>
+                <input type="number" onchange={({target}) => this.temp(target.value)} value="0" max="500" step="10"
+                       class="player-control-tempo" _tempo/>
+            </div>
+            <div class="player-control-mid">
+                <slider-control class="player-control-seeker" change={val => this.seek(val)}
                                 label={(val, min, max) => ((min + max === 0) ? 0 : Math.trunc(this.range(min, max, 0, 100, val))) + '%'}
                                 value="0" _seeker/>
             </div>
-            <div class="player-control-mid">
-                <slider-control change={val => this.temp(val)} value="0" max="500" step="10" _tempo/>
-                <slider-control change={val => this.volume(val)} value="0" max="10" step=".1" _gain/>
-            </div>
-            <div class="player-control-mid">
+            <div class="player-control-bottom">
                 <drop-list data={this.arrUrlSF2 ?? []} index={this.indexSF2} onchange={async e => {
                     const index = e.target.selectedIndex - 1
                     if (~index) await this.loadResource({urlSF: this.pathSF2 + this.arrUrlSF2[index]});
@@ -77,11 +116,14 @@ element('player-control', function () {
 
     this.update = async () => {
         setTimeout(this.update, 100);
+        if (!this.lastIsPlaying && this.isPlaying()) {
+            this._tempo.value = await this.getBpm();
+        }
         if (!this.isPlaying()) return
-        this._gain.setValue(await this.getGain());
-        this._tempo.setValue(await this.getBpm());
+        this._gain.setValue(Math.trunc(await this.getGain()));
         this._seeker.setValue(await this.getCurrentTick());
         this._seeker.setMax(await this.getTotalTicks());
+        this.lastIsPlaying = this.isPlaying()
     };
     this.update();
 
