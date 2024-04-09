@@ -120,7 +120,7 @@ element('player-control', function () {
             this._tempo.value = await this.getBpm();
         }
         if (!this.isPlaying()) return
-        this._gain.setValue(Math.trunc(await this.getGain()));
+        this._gain.setValue(Math.trunc(await this.getGain()*10)/10);
         this._seeker.setValue(await this.getCurrentTick());
         this._seeker.setMax(await this.getTotalTicks());
         this.lastIsPlaying = this.isPlaying()
