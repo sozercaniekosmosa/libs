@@ -33,6 +33,7 @@ element('player-control', function () {
             border-radius: 1em;
             padding: 0 0.8em;
             height: 2em;
+            text-align: center;
         }
 
         .player-control-seeker {
@@ -51,6 +52,10 @@ element('player-control', function () {
             flex-wrap: nowrap;
         }
 
+        .player-control-top button-control {
+            align-items: center;
+        }
+
         .player-control-mid {
             display: flex;
             width: ${'-webkit-fill-available'};
@@ -62,14 +67,23 @@ element('player-control', function () {
             display: flex;
             flex-direction: row;
         }
+
+        @font-face {
+            font-family: Segment7;
+            src: url(${"libs/components/sound/auxiliary/segment7-font/Segment7-4Gml.otf"}) format("opentype");
+        }
+
+        .segment-font {
+            font-family: Segment7;
+        }
     `);
 
     Object.assign(this, new Synthesizer());
 
     this.lastIsPlaying = false;
     this.range = range;
-    this.indexSF2 = 0;
-    this.indexMidi = 0;
+    this.indexSF2 = 0;//2;
+    this.indexMidi = 0;//56;
     const path = './libs/components/sound/';
 
     this.setSources = ({arrUrlSF2, arrUrlMidi, pathSF2 = path + 'sf2/', pathMidi = path + 'mid/'}) => {
@@ -82,15 +96,15 @@ element('player-control', function () {
     }
 
     const render = () => {
-        this.innerHTML = ''
+        this.innerHTML = '';
         // language=JSX
         this.jsx = `
             <div class="player-control-top">
                 <button-control onclick={async e => this.play()}>►</button-control>
                 <button-control onclick={e => this.stop()}>Х</button-control>
-                <slider-control change={val => this.volume(val)} value="0" max="10" step=".1" _gain/>
+                <slider-control class="segment-font" change={val => this.volume(val)} value="0" max="10" step=".1" _gain/>
                 <input type="number" onchange={({target}) => this.temp(target.value)} value="0" max="500" step="10"
-                       class="player-control-tempo" _tempo/>
+                       class="player-control-tempo segment-font" _tempo/>
             </div>
             <div class="player-control-mid">
                 <slider-control class="player-control-seeker" change={val => this.seek(val)}
@@ -120,7 +134,7 @@ element('player-control', function () {
             this._tempo.value = await this.getBpm();
         }
         if (!this.isPlaying()) return
-        this._gain.setValue(Math.trunc(await this.getGain()*10)/10);
+        this._gain.setValue(Math.trunc(await this.getGain() * 10) / 10);
         this._seeker.setValue(await this.getCurrentTick());
         this._seeker.setMax(await this.getTotalTicks());
         this.lastIsPlaying = this.isPlaying()
