@@ -368,3 +368,14 @@ export function saveUnitArrayAsFile(encoded) {
     pom.click();
     document.body.removeChild(pom);
 }
+
+export const createTable = (columns, rows, clb) => {
+    const table = document.createElement('table');
+    for (let i = 0; i < rows; i++) {
+        const row = table.insertRow();
+        for (let j = 0; j < columns; j++)
+            clb && clb({row, cell: row.insertCell(), x: j, y: i});
+    }
+    document.body.appendChild(table);
+    return table
+}
