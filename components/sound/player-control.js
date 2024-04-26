@@ -4,7 +4,19 @@ import "../drop/drop-list.js";
 import "../button/button-control.js";
 import "../slider/slider-control.js";
 
+/**
+ * // HOW TO ...
+ import './libs/components/sound/player-control.js'
 
+ let path = './libs/components/sound/'; //uri where SF and MIDI files
+ let pathSF2 = `./${path}sf2/`; // where exactly is the sf dir
+ let pathMidi = `./${path}mid/`; // where exactly is the sf midi
+ let arrUrlSF2 = ['FatBoy-v0.789.sf2', 'HedsoundGMTfix.sf2'] // list of SF files
+ let arrUrlMidi = ["A Team.mid", "Abba - Money, Money, Money.mid"] // list of MIDI files
+
+ const pc = document.querySelector('player-control') // get component
+ pc.setSources({arrUrlSF2, arrUrlMidi, pathSF2, pathMidi}) // setting parameters
+ */
 element('player-control', function () {
 
     // style
