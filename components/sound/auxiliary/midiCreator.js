@@ -42,9 +42,7 @@ function MIDI_generator() {
     Header.prototype.encode = function () {
         var a = new Uint8Array([0x4d, 0x54, 0x68, 0x64, // MThd
             0x00, 0x00, 0x00, 0x06, // chunk size
-            (this.format >> 8) & 0xff, this.format & 0xff,
-            (this.tracks >> 8) & 0xff, this.tracks & 0xff,
-            0, 0]);
+            (this.format >> 8) & 0xff, this.format & 0xff, (this.tracks >> 8) & 0xff, this.tracks & 0xff, 0, 0]);
         a.set(this.division.encode(), 12);
         return a;
     }
@@ -65,10 +63,7 @@ function MIDI_generator() {
         data.set([0x4d, 0x54, 0x72, 0x6b], 0);
 
         size -= 8;
-        data.set([(size >> 24) & 0xff,
-            (size >> 16) & 0xff,
-            (size >> 8) & 0xff,
-            size & 0xff], 4);
+        data.set([(size >> 24) & 0xff, (size >> 16) & 0xff, (size >> 8) & 0xff, size & 0xff], 4);
         size = 8;
         for (var i = 0; i < encoded.length; i++) {
             data.set(encoded[i], size);
@@ -101,17 +96,11 @@ function MIDI_generator() {
 
     ChannelEvent.encodeDeltaTime = function (dt) {
         if (dt >= (1 << 21)) {
-            return new Uint8Array([((dt >> 21) & 0x7f) | 0x80,
-                ((dt >> 14) & 0x7f) | 0x80,
-                ((dt >> 7) & 0x7f) | 0x80,
-                (dt & 0x7f)]);
+            return new Uint8Array([((dt >> 21) & 0x7f) | 0x80, ((dt >> 14) & 0x7f) | 0x80, ((dt >> 7) & 0x7f) | 0x80, (dt & 0x7f)]);
         } else if (dt >= (1 << 14)) {
-            return new Uint8Array([((dt >> 14) & 0x7f) | 0x80,
-                ((dt >> 7) & 0x7f) | 0x80,
-                (dt & 0x7f)]);
+            return new Uint8Array([((dt >> 14) & 0x7f) | 0x80, ((dt >> 7) & 0x7f) | 0x80, (dt & 0x7f)]);
         } else if (dt >= (1 << 7)) {
-            return new Uint8Array([((dt >> 7) & 0x7f) | 0x80,
-                (dt & 0x7f)]);
+            return new Uint8Array([((dt >> 7) & 0x7f) | 0x80, (dt & 0x7f)]);
         }
         return new Uint8Array([dt & 0x7f]);
     }
@@ -171,9 +160,7 @@ function MIDI_generator() {
     SMTPEOffsetEvent.prototype = Object.create(MetaEvent.prototype);
 
     function SetTempoEvent(microsPerQuarter) {
-        MetaEvent.call(this, 0x51, new Uint8Array([(microsPerQuarter >> 16) & 0xff,
-            (microsPerQuarter >> 8) & 0xff,
-            microsPerQuarter & 0xff]));
+        MetaEvent.call(this, 0x51, new Uint8Array([(microsPerQuarter >> 16) & 0xff, (microsPerQuarter >> 8) & 0xff, microsPerQuarter & 0xff]));
     }
 
     SetTempoEvent.prototype = Object.create(MetaEvent.prototype);
@@ -185,8 +172,7 @@ function MIDI_generator() {
     ChannelPrefixEvent.prototype = Object.create(MetaEvent.prototype);
 
     function SequenceNumberEvent(number) {
-        MetaEvent.call(this, 0x0, new Uint8Array([(number >> 8) & 0xff,
-            number & 0xff]));
+        MetaEvent.call(this, 0x0, new Uint8Array([(number >> 8) & 0xff, number & 0xff]));
     }
 
     SequenceNumberEvent.prototype = Object.create(MetaEvent.prototype);
@@ -243,10 +229,10 @@ function MIDI_generator() {
         File.call(this, 1, TimeDivision.ticksPerBeat(tpb));
 
         var header = new Track();
-        header.addEvent(new MIDI.SMTPEOffsetEvent(0, 0, 0, 0, 0));
-        header.addEvent(new MIDI.SetTempoEvent(500000));
-        header.addEvent(new MIDI.TimeSignatureEvent(4, 4, 2, 0x18, 8));
-        header.addEvent(new MIDI.EndOfTrackEvent());
+        header.addEvent(new MidiCreator.SMTPEOffsetEvent(0, 0, 0, 0, 0));
+        header.addEvent(new MidiCreator.SetTempoEvent(500000));
+        header.addEvent(new MidiCreator.TimeSignatureEvent(4, 4, 2, 0x18, 8));
+        header.addEvent(new MidiCreator.EndOfTrackEvent());
         this.tracks.push(header);
     }
 
@@ -266,10 +252,8 @@ function MIDI_generator() {
      */
     BasicTrack.prototype.addNote = function (octave, letter, timePos, duration, channel = 0) {
         var note = ChannelEvent.noteIndex(octave, letter);
-        this.addEvent(new ChannelEvent(timePos, MIDI.ChannelEvent.NOTE_ON,
-            channel, note, 0x7f));
-        this.addEvent(new ChannelEvent(duration, MIDI.ChannelEvent.NOTE_OFF,
-            channel, note, 0));
+        this.addEvent(new ChannelEvent(timePos, MidiCreator.ChannelEvent.NOTE_ON, channel, note, 0x7f));
+        this.addEvent(new ChannelEvent(duration, MidiCreator.ChannelEvent.NOTE_OFF, channel, note, 0));
     }
 
     BasicTrack.prototype.end = function () {
@@ -294,5 +278,5 @@ function MIDI_generator() {
     };
 }
 
-const MIDI = MIDI_generator();
-if (typeof module != 'undefined') module.exports = MIDI; else window.MIDI = MIDI;
+const MidiCreator = MIDI_generator();
+if (typeof module != 'undefined') module.exports = MidiCreator; else window.MIDI = MidiCreator;

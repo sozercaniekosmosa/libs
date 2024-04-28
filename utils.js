@@ -11,6 +11,21 @@
 //      storage.get('myKey').then(console.log);  // Выведет: 'myValue'
 // });
 
+const base64Language = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const toShortString = (value, language = base64Language) => {
+    const len = language.length;
+    let acc = "";
+    while (value > 0) {
+        const index = value % len;
+        acc += language.charAt(index);
+        value /= len;
+    }
+    return acc.split('').reverse().join('').replace(/^0+/g, '');
+};
+let __id = 0;
+export const generateUID = (pre = '') => pre + toShortString((new Date().getTime()) + Math.ceil(Math.random() * 100) + (__id++))
+
+
 export class IndexedDBStorage {
     constructor(dbName, storeName) {
         this.dbName = dbName;
@@ -369,13 +384,76 @@ export function saveUnitArrayAsFile(encoded) {
     document.body.removeChild(pom);
 }
 
-export const createTable = (columns, rows, clb) => {
-    const table = document.createElement('table');
-    for (let i = 0; i < rows; i++) {
-        const row = table.insertRow();
-        for (let j = 0; j < columns; j++)
-            clb && clb({row, cell: row.insertCell(), x: j, y: i});
+export const createTable = (cols, rows, clb, classTable) => {
+    // Создаем div для таблицы
+    let table = document.createElement('div');
+    classTable & table.classList.add(classTable)
+    table.style.display = 'table';
+
+    for (var i = 0; i < rows; i++) {
+        // Создаем div для строки
+        var row = document.createElement('div');
+        row.style.display = 'table-row';
+
+        for (var j = 0; j < cols; j++) {
+            var cell = document.createElement('div');
+            cell.style.display = 'table-cell';
+            clb({table, row, cell, x: i, y: j});
+
+            row.appendChild(cell);
+        }
+        table.appendChild(row);
     }
-    document.body.appendChild(table);
-    return table
+    return table;
+}
+
+export const setStyle = (strStyle, cssObjectID = generateUID('st')) => {
+    let destNode = document.head;
+    let node = destNode.querySelector('.' + cssObjectID);
+    strStyle = strStyle.replaceAll(/[\r\n]| {2}/g, '')
+    if (!node)
+        destNode.append(getHtmlStr(`<style class='${cssObjectID}'>${strStyle}</style>`)[0]);
+    else
+        node.innerHTML = strStyle;
+
+    return node;
+}
+
+export function getHtmlStr(html) {
+    const template = document.createElement('template'), content = template.content;
+    html = html.trim(); // Never return a text node of whitespace as the result
+    template.innerHTML = html;
+    return content.childNodes.length ? content.childNodes : [content.firstChild];
+}
+
+/**
+ * Вызывает callback на каждй новой точке (Алгоритм Брезенхема)
+ * @param x1
+ * @param y1
+ * @param x2
+ * @param y2
+ * @param callback(x,y)
+ * @returns {*}
+ */
+export function getLinePoints(x1, y1, x2, y2, callback) {
+    var dx = Math.abs(x2 - x1);
+    var dy = Math.abs(y2 - y1);
+    var sx = (x1 < x2) ? 1 : -1;
+    var sy = (y1 < y2) ? 1 : -1;
+    var err = dx - dy;
+
+    while (true) {
+        callback(x1, y1)
+
+        if (x1 === x2 && y1 === y2) break;
+        var e2 = 2 * err;
+        if (e2 > -dy) {
+            err -= dy;
+            x1 += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y1 += sy;
+        }
+    }
 }

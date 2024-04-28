@@ -14,6 +14,13 @@ import jsx from './jsx.js'
 //     return this.classList.contains(uri);
 // }
 
+Element.prototype.getClassNameStartWith = function (classNameStartWith) {
+    for (const className of this.classList) {
+        if (className.startsWith(classNameStartWith)) return className;
+    }
+    return undefined;
+}
+
 const isFunction = functionToCheck => functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
 
 const ATTRIBUTES = new Set(['align', 'alt', 'bgcolor', 'border', 'char', 'charoff', 'charset', 'cite', 'compact', 'disabled',
