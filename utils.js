@@ -398,7 +398,7 @@ export const createTable = (cols, rows, clb, classTable) => {
         for (var j = 0; j < cols; j++) {
             var cell = document.createElement('div');
             cell.style.display = 'table-cell';
-            clb({table, row, cell, x: i, y: j});
+            clb({table, row, cell, x: i, y: j, index: i * cols + j});
 
             row.appendChild(cell);
         }
