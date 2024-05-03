@@ -24,7 +24,7 @@ Element.prototype.getClassNameStartWith = function (classNameStartWith) {
 const isFunction = functionToCheck => functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
 
 const ATTRIBUTES = new Set(['align', 'alt', 'bgcolor', 'border', 'char', 'charoff', 'charset', 'cite', 'compact', 'disabled',
-    'height', 'href', 'hspace', 'longdesc', 'name', 'size', 'src', 'target', 'type', 'valign', /*'value',*/ 'vspace', 'width', 'readonly']);
+    'height', 'href', 'hspace', 'longdesc', 'name', 'size', 'src', 'target', 'type', 'valign', /*'value',*/ 'vspace', 'width', 'readonly', 'checked']);
 
 function getHtmlStr(html) {
     const template = document.createElement('template'), content = template.content;
@@ -116,6 +116,9 @@ export default class BaseHTMLElement extends HTMLElement {
                         this.destination = el;
                     } else if (key === 'id') {
                         el.id = val;
+                    } else if (key.startsWith('data-')) {
+                        const datasetName = key.toLocaleLowerCase().substring('data-'.length);
+                        el.dataset[datasetName] = val;
                     } else if (key.startsWith('style')) {
                         el.style.cssText = val;
                     } else if (ATTRIBUTES.has(key)) {
@@ -299,7 +302,14 @@ window.createKeyHandler = (nodeSrcEvent, callback) => {
     }
     nodeSrcEvent.addEventListener('keyup', keyHandler, true);
     nodeSrcEvent.addEventListener('keydown', keyHandler, true);
+    nodeSrcEvent.addEventListener('blur', resetKeyState, true);
 }
+
+window.createKeyHandler(window, ({event, combine, nodeFocus}) => window.EventBus.dispatchEvent('evb-key', {
+    event,
+    combine,
+    nodeFocus
+}));
 
 const lenVector = (x, y) => Math.sqrt(x * x + y * y);
 let mouse = {

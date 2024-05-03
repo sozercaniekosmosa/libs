@@ -5,7 +5,7 @@ element('button-control', function () {
     // language=CSS
     this.setStyle(`
         button-control {
-            width: fit-content;
+            /*width: fit-content;*/
             min-width: 2em;
             min-height: 1.5em;
             display: flex;

@@ -282,15 +282,19 @@ element('split-cont-v', function () {
     `);
 
 
-    fillBars.call(this);
-    update(document, true);
-    update(document, false);
+    // fillBars.call(this);
+    // update(document, true);
+    // update(document, false);
 
     //behavior
     this.someMethod = () => true;
 
     //life cycle
-    this.onConnected = () => true;
+    this.onConnected = () => {
+        fillBars.call(this);
+        update(document, true);
+        update(document, false);
+    };
     this.onDisconnected = () => true;
     this.onAdopted = () => true;
     this.onAttribute = () => true;

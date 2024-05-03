@@ -1,3 +1,9 @@
+import {debounce} from "../../utils.js";
+
+const backgroundColor = '#ffffff5c'
+const backgroundColorHover = '#00000010'
+const colorFontType = '#00000080'
+
 element('config-s7-control', function () {
 
     // style
@@ -8,8 +14,8 @@ element('config-s7-control', function () {
             flex-direction: column;
             flex-wrap: nowrap;
             padding: 1em;
-            margin: 0 35%;
-            background-color: #ececec;
+            /*margin: 0 35%;*/
+            /*background-color: rgba(0,0,0,0.03);*/
             border: 1px solid #ccc;
             border-radius: .3em;
             overflow: auto;
@@ -21,15 +27,16 @@ element('config-s7-control', function () {
             display: flex;
             flex-direction: column;
             flex-wrap: nowrap;
+            margin-right: 3em;
         }
 
         .config-s7-control__type {
-            font-weight: bold;
-            color: #a7acbd;
+            /*font-weight: bold;*/
+            color: ${colorFontType};
         }
 
         .config-s7-control__db-name:hover {
-            background-color: #d9d9d9;
+            background-color: ${backgroundColorHover};
         }
 
         .config-s7-control__db-name {
@@ -37,14 +44,35 @@ element('config-s7-control', function () {
             cursor: default;
         }
 
+        .config-s7-control__db-header {
+            display: flex;
+            align-items: center;
+        }
+
+        .config-s7-control__db-index {
+            font-weight: bold;
+            cursor: default;
+            /*width: 2px;*/
+            margin-left: .5em;
+            padding: 0 .3em;
+            /*border: 1px solid #e9e9e9;*/
+            border: none;
+            color: #414141;
+            border-radius: 4px;
+            background-color:${backgroundColor}
+        }
+
         .config-s7-control__arr-name:hover {
-            background-color: #d9d9d9;
+            background-color: ${backgroundColorHover};
         }
 
         .config-s7-control__arr-name {
             cursor: default;
             display: flex;
             flex-direction: row;
+        }
+        .config-s7-control__arr-name>input {
+            margin-top: 1px;
         }
 
         .config-s7-control__arr-item {
@@ -55,7 +83,7 @@ element('config-s7-control', function () {
         }
 
         .config-s7-control__arr-item:hover {
-            background-color: #d9d9d9;
+            background-color: ${backgroundColorHover};
         }
 
         button-control {
@@ -70,57 +98,84 @@ element('config-s7-control', function () {
         setTimeout(() => this._setValue(arrRes), 200)
     }
 
+    let groupUpdate = debounce((node) => {
+        let nodeGroup = node.closest('.container-hide-control__element')
+        if (nodeGroup === null) return;
+
+        let quantity = nodeGroup.childElementCount - 1;
+        let quantityChecked = [...nodeGroup.querySelectorAll('.config-s7-control__chb:checked')].length
+        let nodeCheckboxGroup = nodeGroup.querySelector('.config-s7-control__arr-name > input');
+        nodeCheckboxGroup.checked = quantityChecked === quantity;
+    }, 200);
+
     const change = (e) => {
         let node = e.target ?? e;
-        if (node.index === undefined) return;
-        let select = this.map[node.index]
-        this.mapSelected[node.checked ? 'add' : 'delete'](select)
 
-        console.log(select, this.mapSelected)
+        if (!node.nameDB) {
+            if (node['path'] === undefined) return;
+            let d = this.list;
+            node['path'].split('.').forEach(k => d = d?.[k]);
+            d.enabled = node.checked;
+        } else {
+            this.list[node.nameDB].index = node.value;
+        }
+
+        groupUpdate(node);
     };
 
     this.groupSelect = (e) => {
         const isChecked = e.target.checked;
         const arrNode = [...e.target.parentElement.parentElement.querySelectorAll('input[type=checkbox]')]
         arrNode.forEach(node => {
-            if (node.index === undefined) return;
             if (isChecked !== node.checked) node.click()
         })
     }
 
-    this._setValue = (arrRes) => {
-        console.info(arrRes)
+    this._setValue = (list) => {
+
+        let arrRes = Object.entries(list);
+        arrRes.sort((a, b) => a[0].localeCompare(b[0]));
+        // debugger
         this.innerHTML = '';
         this.map = [];
         this.mapSelected = new Set();
+        window.mapSelected = this.mapSelected;
         let jsx = '';
+        this.list = list;
         for (let i = 0; i < arrRes.length; i++) {
-            const {name: nameDB, struct: arrStruct} = arrRes[i];
-            let struct = '';
-            for (let j = 0; j < arrStruct.length; j++) {
-                const {name, type, size} = arrStruct[j];
+            const [nameDB, db] = arrRes[i];
+            let {index, tags} = db;
+            this.nameDB = nameDB;
+            let html = '';
+            for (let j = 0; j < tags.length; j++) {
+                const {name, type, size, enabled, offset, values} = tags[j];
                 if (size) { //is array
+                    const generalСheck = values.every(it => it.enabled);
                     // language=JSX
-                    struct += `<container-hide-control hide>
+                    html += `<container-hide-control hide>
                         <div class="config-s7-control__arr-name">
-                            <input type="checkbox" onchange={this.groupSelect}/>
+                            <input type="checkbox" onchange={this.groupSelect} ${generalСheck ? 'checked' : ''}/>
                             <div>${name}:</div>
                             <div class="config-s7-control__type">${type} (${size})</div>
                         </div>`
                     for (let k = 0; k < size; k++) {
                         // language=JSX
-                        struct +=
-                            `<div class="config-s7-control__arr-item"><input type="checkbox" index=${this.map.length}/>
+                        html +=
+                            `<div class="config-s7-control__arr-item">
+                                <input class="config-s7-control__chb" type="checkbox"
+                                       path="${nameDB}.tags.${j}.values.${k}"
+                                       ${values[k].enabled ? 'checked' : ''}/>
                                 <div>${k}</div>
                             </div>`
 
                         this.map.push(`${nameDB}.${name}.${k}`)
                     }
-                    struct += `</container-hide-control>`
+                    html += `</container-hide-control>`
                 } else {
                     // language=JSX
-                    struct +=
-                        `<div class="config-s7-control__arr-item"><input type="checkbox" index=${this.map.length}/>
+                    html +=
+                        `<div class="config-s7-control__arr-item">
+                            <input type="checkbox" path="${nameDB}.tags.${j}" ${enabled ? 'checked' : ''}/>
                             <div>${name}:</div>
                             <div class="config-s7-control__type">${type}</div>
                         </div>`
@@ -129,18 +184,32 @@ element('config-s7-control', function () {
             }
 
             // language=JSX
-            jsx += `<div class="config-s7-control__db-item">
-                <div class="config-s7-control__db-name">${nameDB}</div>
-                <div>${struct}</div>
-            </div>`;
-
+            jsx +=
+                `<div class="config-s7-control__db-item">
+                    <div class="config-s7-control__db-header">
+                        <div class="config-s7-control__db-name">${nameDB}</div>
+                        <input class="config-s7-control__db-index" type="number" min="0" max="9999"
+                               value="${index ?? i}"
+                               nameDB="${nameDB}" oninput={this.onInputIndex}/>
+                    </div>
+                    <div>${html}</div>
+                </div>`;
         }
         this.jsx = jsx;
-
+        // setTimeout(() => this.querySelectorAll('input')[1].click(), 500)
+        // setTimeout(() => this.querySelectorAll('input')[12].click(), 500)
         this.addEventListener('change', change)
+
+        setTimeout(() => this.querySelectorAll('input[type=number]').forEach(node => {
+            node.style.width = node.value.toString().length + 1 + 'em'
+        }), 100)
     };
 
-    this.getMap = () => [...this.mapSelected.values()];
+    this.onInputIndex = ({target}) => {
+        target.style.width = target.value.toString().length + 1 + 'em';
+    };
+
+    this.getMap = () => this.list;
 
     this.onConnected = () => {
     };
@@ -150,6 +219,7 @@ element('config-s7-control', function () {
 });
 
 function noramalizeString(str) {
+    str = str.replaceAll(/\/\/.*/g, '') // remove line comments
     str = str.replaceAll(/\s/g, '')
     return str;
 }
@@ -170,7 +240,7 @@ function parseDataBlocks(data) {
     data = noramalizeString(data);
 
     let arrDataBlock = getArrDataBlock(data)
-    let arrRes = [];
+    let list = {};
 
     for (let i = 0; i < arrDataBlock.length; i++) {
         let it = arrDataBlock[i];
@@ -186,7 +256,7 @@ function parseDataBlocks(data) {
         crop = cropStr(it, indexStructEnd, indexStructStart);
 
         let arrStruct = crop.substr.split(';');
-        let struct = [];
+        let tags = [];
 
         for (let j = 0; j < arrStruct.length; j++) {
             let itStruct = arrStruct[j];
@@ -202,10 +272,16 @@ function parseDataBlocks(data) {
             } else {
                 type = part;
             }
-            struct.push({name, type, size})
+            if (size)
+                tags.push({
+                    name, offset: 0, type, size,
+                    values: Array(size).fill({}).map((it, i) => ({offset: i, enabled: false})),
+                })
+            else
+                tags.push({name, offset: 0, type, enabled: false})
         }
 
-        arrRes.push({name, struct})
+        list[name] = {tags, index: i}
     }
-    return arrRes;
+    return list;
 }
