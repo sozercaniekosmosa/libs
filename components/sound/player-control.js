@@ -80,14 +80,14 @@ element('player-control', function () {
             flex-direction: row;
         }
 
-        @font-face {
+/*        @font-face {
             font-family: Segment7;
             src: url(${"libs/components/sound/auxiliary/segment7-font/Segment7-4Gml.otf"}) format("opentype");
         }
 
         .segment-font {
             font-family: Segment7;
-        }
+        }*/
     `);
 
     Object.assign(this, new Synthesizer());
