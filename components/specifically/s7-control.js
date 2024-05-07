@@ -1,5 +1,5 @@
 import {rpc, loadText} from "../../utils.js";
-import clientData from '../../clientData.js';
+import clientData from '../../../capsule-lib/clientData.js';
 
 const backgroundColor = 'rgba(0,0,0,0.05)'
 const backgroundColorLight = 'rgba(255, 255, 255, 0.5)'
@@ -281,7 +281,7 @@ element('s7-control', function () {
         <drop-file data={this['callbackData']}>переместите файл с данными сюда</drop-file>`;
 
         if (document.location.hostname === 'localhost') { // для тестирования
-            loadText('./data/10real_50bool_500word.db').then(data => this.callbackData(data))
+            loadText('./temp/DB10.db').then(data => this.callbackData(data))
         } else {// боевой
             clientData['subscribe']({
                 taskID: 'getData', data: ['getData'], callbackClose: () => {
