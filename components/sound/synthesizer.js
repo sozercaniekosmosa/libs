@@ -5,7 +5,6 @@ script.setAttribute("defer", "defer");
 script.src = path + 'js-synth.js';
 document.head.appendChild(script);
 
-
 /**
  * Класс для воспроизведения midi-файлов
  *
